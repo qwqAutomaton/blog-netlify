@@ -1,0 +1,9 @@
+.github
+.deploy_git
+.vscode
+node_modules
+public
+
+db.json
+*.sh
+
