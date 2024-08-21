@@ -142,9 +142,9 @@ $$
   \overline{x'_n}=x'_n+\dfrac 1{10^n}=-a_0.a_1a_2\cdots a_n
   $$
 
-### 实数大小比较的等价条件和应用
+我们不难看出这两个近似的“单调性”：当 $n$ 增大时，$x$ 的不足近似 $x_n$ 不减，且总不大于 $x$，即 $x_0\le x_1 \le x_2 \le \cdots\le x$; 类似地，$x$ 的过剩近似 $\overline{x_n}$ 不增，且总不小于 $x$，即 $\overline{x_0}\ge \overline{x_1}\ge \overline {x_2}\ge \cdots \ge x$.
 
-我们不难看出这两个近似的“单调性”：当 $n$ 增大时，$x$ 的不足近似 $x_n$ 不减，即 $x_0\le x_1 \le x_2 \le \cdots$; 类似地，$x$ 的过剩近似 $\overline{x_n}$ 不增，即 $\overline{x_0}\ge \overline{x_1}\ge \overline {x_2}\ge \cdots$.
+### 实数大小比较的等价条件和应用
 
 利用上面的近似，可以得出两个实数之间大小比较的一个**等价条件**。
 
@@ -196,13 +196,21 @@ $$
 
 取等号当且仅当 $a_k=b_k+1,a_{k+1}=0,b_{k+1}=9$. 接下来证明这种情况能够回归到其他普通的、已经证明了的状态。
 
-根据上面将有限小数表示为无限小数的规则，一定能找到一个数 $n'>k+1$ 使得 $a_{n'}\ne 0$（此时两个数可以理解为 $x=a_0.a_1a_2\cdots a_k0\cdots 0a_{n'}\cdots, y=b_0.b_1b_2\cdots b_k9\cdots b_{n'-1}b_{n'}\cdots$）。那么现在令 $n=n'$ 作差就有
+根据上面将有限小数表示为无限小数的规则，一定能找到一个数 $n'>k+1$ 使得 $a_{n'}\ne 0$（此时两个数可以理解为 $x=a_0.a_1a_2\cdots a_k0\cdots 0a_{n'}\cdots, y=b_0.b_1b_2\cdots b_k9\cdots b_{n'-1}b_{n'}\cdots$）。那么现在令 $n=n'$ 就有
 
 $$
 \begin{aligned}
-x_{n'}-\overline{y_{n'}}&=
+x_{n'}>x_n
 \end{aligned}
 $$
+
+$\impliedby$: 根据上面近似的“单调性”，有
+
+$$
+x\ge x_n>\overline{y_n}\ge y
+$$
+
+即 $x>y$.
 
 </details>
 
