@@ -161,9 +161,17 @@ $$
 
 考虑分两部分证。
 
-$\implies$: 讨论 $x,y$ 的正负性。
+由于 $x>0>y$ 时是显然的，而 $0>x>y$ 的情况很容易转化为两个正实数之间的大小比较（加负号反过来即可）。下面仅证明正实数的情况。
 
-若它们都是非负实数，根据大于的定义，存在 $n\in\mathbb N$ 使得
+$\impliedby$: 根据上面近似的“单调性”，有
+
+$$
+x\ge x_n>\overline{y_n}\ge y
+$$
+
+即 $x>y$.
+
+$\implies$: 根据大于的定义，存在 $n\in\mathbb N$ 使得
 
 $$
 a_i=b_i(i=0,1,\cdots,k-1),a_k>b_k
@@ -191,26 +199,12 @@ $$
 由于 $a_k>b_k\implies a_k\ge b_k+1$（注意 $a_i,b_i\in \mathbb N$），且 $a_{k+1}\ge 0,b_{k+1}\le 9$，得到
 
 $$
-x_n-\overline{y_n}\ge 10^{-k}+10\times 10^{-k-1}=0
+x_n-\overline{y_n}\ge 10^{-k}+10\times 10^{-k-1}=0\qquad \qquad(*)
 $$
 
 取等号当且仅当 $a_k=b_k+1,a_{k+1}=0,b_{k+1}=9$. 接下来证明这种情况能够回归到其他普通的、已经证明了的状态。
 
-根据上面将有限小数表示为无限小数的规则，一定能找到一个数 $n'>k+1$ 使得 $a_{n'}\ne 0$（此时两个数可以理解为 $x=a_0.a_1a_2\cdots a_k0\cdots 0a_{n'}\cdots, y=b_0.b_1b_2\cdots b_k9\cdots b_{n'-1}b_{n'}\cdots$）。那么现在令 $n=n'$ 就有
-
-$$
-\begin{aligned}
-x_{n'}>x_n
-\end{aligned}
-$$
-
-$\impliedby$: 根据上面近似的“单调性”，有
-
-$$
-x\ge x_n>\overline{y_n}\ge y
-$$
-
-即 $x>y$.
+考虑接下来从 $n$ 开始逐个检查它后面的数。假设当前检查到了 $n'>n$. 那么显然 $(*)$ 式能取等当且仅当 $a_i\equiv 0,b_i\equiv 9$ 对于所有的 $n\le i\le n'$. 根据实数的无限小数表示，这种情况时不存在的。因此能够回归到普通的状态（即递归能够返回）。
 
 </details>
 
