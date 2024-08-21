@@ -28,11 +28,11 @@ description: 不可以摸鱼了！于是开始看一点数分然后乱口胡 qwq
   
   $$
   \begin{aligned}
-1.{\color{red}\dot 2}&=1.\color{red}222\cdots\\
-1.2{\color{red}\dot 3}&=1.2\color{red}333\cdots\\
-1.{\color{red}\dot2\dot3}&=1.\color{red}232323\cdots\\
-1.2{\color{red}\dot34\dot 5}&=1.2\color{red}345343545\cdots
-\end{aligned}
+  1.{\color{red}\dot 2}&=1.\color{red}222\cdots\\
+  1.2{\color{red}\dot 3}&=1.2\color{red}333\cdots\\
+  1.{\color{red}\dot2\dot3}&=1.\color{red}232323\cdots\\
+  1.2{\color{red}\dot34\dot 5}&=1.2\color{red}345343545\cdots
+  \end{aligned}
   $$
 
 ## 实数
