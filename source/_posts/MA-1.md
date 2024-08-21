@@ -9,8 +9,8 @@ description: 不可以摸鱼了！于是开始看一点数分然后乱口胡 qwq
 
 # 数学分析笔记 (1)
 
-## 写在前面 & 记号约定
 
+## 写在前面 & 记号约定
 
 书用的是华东师范编的第五版（高等教育出版社）。
 
@@ -133,12 +133,79 @@ $$
 - 而非负实数 $x$ 的 **$n$ 位过剩近似**为有理数
   
   $$
-  \bar{x_n}=x_n+\dfrac 1{10^n}=a_0.a_1a_2\cdots a_n+\dfrac 1{10^n}
+  \overline{x_n}=x_n+\dfrac 1{10^n}=a_0.a_1a_2\cdots a_n+\dfrac 1{10^n}
   $$
 
   类似地，对于负实数 $x'$，它的 $n$ 位过剩近似为
 
   $$
-  \bar{x'_n}=x'_n+\dfrac 1{10^n}=-a_0.a_1a_2\cdots a_n
+  \overline{x'_n}=x'_n+\dfrac 1{10^n}=-a_0.a_1a_2\cdots a_n
   $$
 
+### 实数大小比较的等价条件和应用
+
+我们不难看出这两个近似的“单调性”：当 $n$ 增大时，$x$ 的不足近似 $x_n$ 不减，即 $x_0\le x_1 \le x_2 \le \cdots$; 类似地，$x$ 的过剩近似 $\overline{x_n}$ 不增，即 $\overline{x_0}\ge \overline{x_1}\ge \overline {x_2}\ge \cdots$.
+
+利用上面的近似，可以得出两个实数之间大小比较的一个**等价条件**。
+
+**命题** 设 $x=a_0.a_1a_2\cdots$ 和 $y=b_0.b_1b_2\cdots$ 是两个实数。那么 $x>y$ 的一个等价条件是：存在一个非负整数 $n\in\mathbb N$，使得
+
+$$
+x_n>\overline{y_n}
+$$
+
+~~书上说证明见附录 I 第 8 节我怎么没看到呢 qaq~~
+
+<details>
+<summary>证明</summary>
+
+考虑分两部分证。
+
+$\implies$: 讨论 $x,y$ 的正负性。
+
+若它们都是非负实数，根据大于的定义，存在 $n\in\mathbb N$ 使得
+
+$$
+a_i=b_i(i=0,1,\cdots,k-1),a_k>b_k
+$$
+
+因此，取 $n=k+1$，则有
+
+$$
+\begin{aligned}
+x_n&=a_0.a_1a_2\cdots a_ka_{k+1}\\
+\overline{y_n}&=b_0.b_1b_2\cdots b_kb_{k+1}+\dfrac 1{10^{k+1}}
+\end{aligned}
+$$
+
+两式相减，得到
+
+$$
+\begin{aligned}
+x_n-\overline{y_n}&=\quad a_k\times10^{-k}+a_{k+1}\times 10^{-k-1}\\
+&\quad-b_k\times 10^{-k}-b_{k+1}\times 10^{-k-1}-10^{-k-1}\\
+&=(a_k-b_k)\times 10^{-k}+(a_{k+1}-b_{k+1}-1)\times 10^{-k-1}
+\end{aligned}
+$$
+
+由于 $a_k>b_k\implies a_k\ge b_k+1$（注意 $a_i,b_i\in \mathbb N$），且 $a_{k+1}\ge 0,b_{k+1}\le 9$，得到
+
+$$
+x_n-\overline{y_n}\ge 10^{-k}+10\times 10^{-k-1}=0
+$$
+
+取等号当且仅当 $a_k=b_k+1,a_{k+1}=0,b_{k+1}=9$. 接下来证明这种情况能够回归到其他普通的、已经证明了的状态。
+
+根据上面将有限小数表示为无限小数的规则，一定能找到一个数 $n'>k+1$ 使得 $a_{n'}\ne 0$（此时两个数可以理解为 $x=a_0.a_1a_2\cdots a_k0\cdots 0a_{n'}\cdots, y=b_0.b_1b_2\cdots b_k9\cdots b_{n'-1}b_{n'}\cdots$）。那么现在令 $n=n'$ 作差就有
+
+$$
+\begin{aligned}
+x_{n'}-\overline{y_{n'}}&=
+\end{aligned}
+$$
+
+</details>
+
+$$
+\texttt{<To be continued>}
+$$
