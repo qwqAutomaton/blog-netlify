@@ -12,7 +12,7 @@ description: 实地址太危险了一不小心就 jmp 错地方爆了 /ll
 
 ~~不是什么时候能用 C 啊我不想再 mov 来 mov 去了（大吵大闹~~
 
-这篇写了好久…… 代码量也开始有点多了，扔 github 上存着：[QOS-](https://github.com/qwqAutomaton/QOS)
+这篇写了好久…… 代码量也开始有点多了，扔 github 上存着：[QOS.git](https://github.com/qwqAutomaton/QOS)
 
 ## re: 寄存器
 
