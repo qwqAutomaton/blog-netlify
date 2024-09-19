@@ -9,6 +9,8 @@ description: 补充一下之前进入保护模式的一些细节 qwq 以及怎�
 
 # QOS 开发日记 5: 流水线和内存
 
+(upd @ 20240911 补完后面的内存查询w)
+
 ## 流水线
 
 进入保护模式之前需要先 `jmp` 一次还记得嘛 qwq
@@ -61,4 +63,70 @@ jmp     dword       SEL_CODE : pe_start
 
 ## 内存查询
 
-那么如何查询具体的内存大小？咕咕
+那么如何查询具体的内存大小？实际上有（）种方法。不过这些都需要在进入保护模式之前使用 BIOS 中断来实现（因为进入之后就不能用中断了 qaq）。
+
+我们注意到可以使用 `detect_memory` 函数进行内存检测：
+
+```c
+int detect_memory();
+```
+
+~~对就是这么简单~~ （好像是在 linux 的 `setup.bin` 里面？）
+
+然而这个函数底层是通过调用 `0x15` 号中断实现的。那么子功能号当然就是根据 `eax` 寄存器决定了。大概是：
+
+|`eax`|功能|
+|:---:|:-:|
+|`0xe820`|遍历主机上所有内存|
+|`0xe801`|分别检测低于 $15\texttt{MB}$ 和 $16\texttt{M}\sim 4\texttt{GB}$ 内存。最大支持 $4\texttt{GB}$|
+|`0x88__`(实际上是 `ah=0x88`)|最多检测 $64\texttt{MB}$ 内存，实际内存超过此容量也按照 $64\texttt{MB}$ 返回|
+
+### 0xe820 查询
+
+这三个功能中最强大的是 `0xe820`，因为它返回的信息是最丰富的。实际上它返回的是一个“结构体”，也就是**地址范围描述符结构体**（Addreses range descriptor structure, ARDS）。格式：
+
+![ARDS 格式](ARDS.jpg)
+
+可以理解为这个 `struct`：
+
+```c
+struct ARDS
+{   // sizeof(unsigned) = 4
+    unsigned BaseAddrLow, BaseAddrHigh;
+    unsigned LengthLow, LengthHigh;
+    unsigned Type;
+    // 或者直接 unsigned long long BaseAddr; 也行...
+};
+```
+
+其它四个都比较好理解（基址、长度），下面是这个 `Type` 的格式：
+
+![ARDS type 格式](ARDS-type.jpg)
+
+那么什么内存会被判定为保留？主要是：
+
+- 系统 ROM.
+- 设备内存映射（比如实模式下的 `0xb80000~0xbffff`.
+- 由于一些奇怪的原因这块内存不可用。
+
+不过由于现在做的是 $32$ 位的系统，我们只需要考虑 `BaseAddrLow` 之类的低 $4\texttt B$ 的部分。
+
+嗯不过用 `0xe820` 这个子功能还有别的参数：
+
+![0xe820 parameters part 1](e820-param.jpg)
+
+![0xe820 parameters part 2](e820-param-2.jpg)
+
+有一个很有意思的点：`ecx` 指的是缓冲区的大小（也就是预留的空间），然后 `es:di` 是缓冲区的地址。实际上在使用的时候，调用者应当在 `ecx` 写入希望获得的大小，而结果则是获取的实际大小。
+
+### 0xe801 查询
+
+不过上面那个虽然强大，但是还是很麻烦…… 而这个子功能最大能够识别到 $4\texttt{GB}$ 的内存，刚好是 32 位系统支持的最大内存。
+
+![0xe801 parameters](e801.jpg)
+
+指的注意的是，这样中断得到的结果是放在两组寄存器中的。
+
+低于 $15\texttt{MB}$ 的部分以 $1\texttt{KB}$ 为单位记录在 `ax` 和 `cx` 两个寄存器中（`ax` = `cx`），它们的最大值是 $\texttt{0x3c00}$（因为 $\texttt{0x3c00}\times 1024=15\texttt{MB}$）。
+
+高于 $16\texttt{MB}$
