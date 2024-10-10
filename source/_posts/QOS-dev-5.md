@@ -79,24 +79,24 @@ int detect_memory();
 |:---:|:-:|
 |`0xe820`|遍历主机上所有内存|
 |`0xe801`|分别检测低于 $15\texttt{MB}$ 和 $16\texttt{M}\sim 4\texttt{GB}$ 内存。最大支持 $4\texttt{GB}$|
-|`0x88__`(实际上是 `ah=0x88`)|最多检测 $64\texttt{MB}$ 内存，实际内存超过此容量也按照 $64\texttt{MB}$ 返回|
+|`0x8800`(实际上是 `ah=0x88`)|最多检测 $64\texttt{MB}$ 内存，实际内存超过此容量也按照 $64\texttt{MB}$ 返回|
 
-### 0xe820 查询
+这三个功能中最强大的是 `0xe820`，因为它返回的信息是最丰富的。因此就用这种方式查内存啦~
 
-这三个功能中最强大的是 `0xe820`，因为它返回的信息是最丰富的。实际上它返回的是一个“结构体”，也就是**地址范围描述符结构体**（Addreses range descriptor structure, ARDS）。格式：
+实际上 `0xe820` 子功能返回的是一个“结构体”，也就是**地址范围描述符结构体**（Addreses range descriptor structure, ARDS）。格式：
 
 ![ARDS 格式](ARDS.jpg)
 
 可以理解为这个 `struct`：
 
 ```c
-struct ARDS
+typedef struct
 {   // sizeof(unsigned) = 4
-    unsigned BaseAddrLow, BaseAddrHigh;
-    unsigned LengthLow, LengthHigh;
-    unsigned Type;
+    unsigned int BaseAddrLow, BaseAddrHigh;
+    unsigned int LengthLow, LengthHigh;
+    unsigned int Type;
     // 或者直接 unsigned long long BaseAddr; 也行...
-};
+} ARDS;
 ```
 
 其它四个都比较好理解（基址、长度），下面是这个 `Type` 的格式：
@@ -106,7 +106,7 @@ struct ARDS
 那么什么内存会被判定为保留？主要是：
 
 - 系统 ROM.
-- 设备内存映射（比如实模式下的 `0xb80000~0xbffff`.
+- 设备内存映射（比如实模式下的 `0xb80000 - 0xbffff` 映射到文本模式的 VGA）。
 - 由于一些奇怪的原因这块内存不可用。
 
 不过由于现在做的是 $32$ 位的系统，我们只需要考虑 `BaseAddrLow` 之类的低 $4\texttt B$ 的部分。
@@ -143,32 +143,48 @@ do
 写成汇编就是这一坨 qaq：
 
 ```x86asm
-xor ebx, ebx ; 也就是清零
-mov eds, 0x534d4150
-; es 不用设置
-mov di, adrs_addr ; 设置目标地址
-.query_memory
-    mov eax, 0xe820
+    ; 检查内存
+    ; 在 ards 处开辟一块存 ARDS 的空间
+    ; ards_cnt 处存放 ARDS 数量（2B）
+    xor ebx, ebx
+    mov edx, 0x534d4150
+    mov di, ards
+.check_mem:
+    mov eax, 0x0000_e820
     mov ecx, 20
     int 0x15
-    jc .query_fail ; CF = 1，跳转
-    add di, cx ; 自增
-    cmp ebx, 0 ; 比较一下
-    jnz .query_memory ; 循环
-
-.query_fail
-    ; 反正就是异常处理
-    ; 打印 "ERR" 什么的
+    jc .check_mem_fail
+    inc word [ards_cnt]
+    add di, cx
+    cmp ebx, 0
+    jnz .check_mem
+    jmp .check_mem_finished
+.check_mem_fail:
+    ; 总之是输出失败之类的 w
+.check_mem_finished:
+    ; 输出查询结束
 ```
 
-### 0xe801 查询
+由于它是检验内存的，我们将其放在 Loader 加载 GDT 的部分之前。同时在开头 GDT 后面增加一块用于储存 ARDS 的区域。用 C 理解大概是：
 
-不过上面那个虽然强大，但是还是很麻烦…… 而这个子功能最大能够识别到 $4\texttt{GB}$ 的内存，刚好是 32 位系统支持的最大内存。
+```c
+struct ARDS ards[25]; // 暂时开 25 个
+unsigned short ards_cnt; // 再额外开 2B 用于计数
+// ...
+// check memory
+```
 
-![0xe801 parameters](e801.jpg)
+为了方便在内存中找到这块 `ards` 内存，可以在这块内存之前存一个魔法数字（比如 `dq 0x1145_1419_1981_0AAA`）。在 bochs 中，查询内存使用命令 `x` 或 `xp`.
 
-指的注意的是，这样中断得到的结果是放在两组寄存器中的。
+那么经过测试，有 $6$ 块 ARDS，其中每块的内容为：
 
-低于 $15\texttt{MB}$ 的部分以 $1\texttt{KB}$ 为单位记录在 `ax` 和 `cx` 两个寄存器中（`ax` = `cx`），它们的最大值是 $\texttt{0x3c00}$（因为 $\texttt{0x3c00}\times 1024=15\texttt{MB}$）。
+|ARDS 编号|基址 `BaseAddrLow`|长度 `LangthLow`|类型 `Type`|
+|:------:|:----------------:|:-------------:|:--------:|
+|$0$|`0x00000000`|`0x0009f000`|`0x01` 可用内存|
+|$1$|`0x0009f000`|`0x00001000`|`0x02` 保留内存|
+|$0$|`0x000e8000`|`0x00018000`|`0x02` 保留内存|
+|$0$|`0x00100000`|`0x01ef0000`|`0x01` 可用内存|
+|$0$|`0x01ff0000`|`0x00010000`|`0x03` 保留内存|
+|$0$|`0xfffc0000`|`0x00040000`|`0x02` 保留内存|
 
-高于 $16\texttt{MB}$
+这和第一篇当中实模式下的内存分配是相同的。
